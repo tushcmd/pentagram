@@ -4,11 +4,13 @@
 
 export async function generateImage(text: string) {
   try {
-    const response = await fetch("/api/generate-image", {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    const response = await fetch(`${baseUrl}/api/generate-image`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-SECRET": process.env.API_SECRET || "",
+        "X-API-Key": process.env.API_KEY || "", // Changed from X-API-Secret
       },
       body: JSON.stringify({ text: text }),
     });

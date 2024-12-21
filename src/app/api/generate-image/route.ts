@@ -7,45 +7,41 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { text } = body;
 
-    const apiSecret = request.headers.get("X-API-Secret");
+    const apiKey = request.headers.get("X-API-Key");
 
-    if (apiSecret !== process.env.API_SECRET) {
+    if (apiKey !== process.env.API_KEY) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    // TODO: Call your Image Generation API here
-    // For now, we'll just echo back the text
-    console.log(`Received: ${text}`);
+    const apiEndpoint =
+      process.env.STABLE_DIFFUSION_API_URL ||
+      "https://tushcmd--stable-diffusion-modal-generate.modal.run";
 
-    const url = new URL(
-      "https://tushcmd--stable-diffusion-modal-generate.modal.run/"
+    const apiResponse = await fetch(
+      `${apiEndpoint}?prompt=${encodeURIComponent(text)}`,
+      {
+        method: "GET",
+        headers: {
+          "X-API-Key": process.env.API_KEY || "",
+          Accept: "image/jpeg",
+        },
+      }
     );
 
-    url.searchParams.set("prompt", text);
-
-    console.log("Requesting URL:", url.toString());
-
-    const response = await fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        "X-API-Key": process.env.API_KEY || "",
-        Accept: "image/jpeg",
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
       console.error("Failed to fetch image:", errorText);
-      throw new Error(`HTTP Error: ${response.status}, message: ${errorText}`);
+      throw new Error(
+        `HTTP Error: ${apiResponse.status}, message: ${errorText}`
+      );
     }
 
-    const imageBuffer = await response.arrayBuffer();
+    const imageBuffer = await apiResponse.arrayBuffer();
 
     const filename = `${crypto.randomUUID()}.jpg`;
-
     const blob = await put(filename, imageBuffer, {
       access: "public",
       contentType: "image/jpeg",
@@ -55,10 +51,14 @@ export async function POST(request: Request) {
       success: true,
       imageUrl: blob.url,
     });
-    // TODO:Store Prompt in database
-  } catch {
+  } catch (error) {
+    console.error("Error details:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to process request" },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to process request",
+      },
       { status: 500 }
     );
   }
