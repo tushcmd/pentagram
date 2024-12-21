@@ -25,6 +25,12 @@ export async function POST(request: Request) {
       },
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to fetch image:", errorText);
+      throw new Error(`HTTP Error: ${response.status}, message: ${errorText}`);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Received: ${text}`,
