@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -48,17 +49,23 @@ export default function Home() {
     // TODO: Update the UI here to show the images generated
 
     <div className="min-h-screen flex flex-col justify-between p-8">
-      <main className="flex-1">{/* Main content can go here */}</main>
+      <main className="flex-1 flex flex-col items-center gap-8">
+        {/* Main content can go here */}
+        {/* <h1 className="text-3xl font-bold text-center mb-8">
+          Image Generator
+        </h1> */}
+        {imageUrl && (
+          <div className="w-full max-w-2xl mx-auto rounded-lg overflow-hidden shadow-lg">
+            <img
+              src={imageUrl}
+              alt="Generated Image"
+              className="w-full h-auto"
+            />
+          </div>
+        )}
+      </main>
 
-      {imageUrl && (
-        <div className="w-full max-w-2xl mx-auto rounded-lg overflow-hidden shadow-lg">
-          <img
-            src={imageUrl}
-            alt="Generated Image"
-            className="w-full h-auto"
-          />
-        </div>
-      )}
+
 
       <footer className="w-full max-w-3xl mx-auto">
         <form onSubmit={handleSubmit} className="w-full">
@@ -84,3 +91,5 @@ export default function Home() {
     </div>
   );
 }
+
+// In the python code play with inference parameters also try different models.
