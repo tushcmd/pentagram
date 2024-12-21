@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       success: true,
       imageUrl: blob.url,
     });
+    // TODO:Store Prompt in database
   } catch {
     return NextResponse.json(
       { success: false, error: "Failed to process request" },
