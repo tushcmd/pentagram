@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -31,9 +33,18 @@ export async function POST(request: Request) {
       throw new Error(`HTTP Error: ${response.status}, message: ${errorText}`);
     }
 
+    const imageBuffer = await response.arrayBuffer();
+
+    const filename = `${crypto.randomUUID()}.jpg`;
+
+    const blob = await put(filename, imageBuffer, {
+      access: "public",
+      contentType: "image/jpeg",
+    });
+
     return NextResponse.json({
       success: true,
-      message: `Received: ${text}`,
+      imageUrl: blob.url,
     });
   } catch {
     return NextResponse.json(
